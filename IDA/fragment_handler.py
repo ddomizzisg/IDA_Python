@@ -87,3 +87,49 @@ def fragment_reader(filenames):
     
     return (m_, n_, p_, fragments)
     
+
+def fragment_reader_bytes(fragments): 
+    """
+    Inputs: 
+    fragments: a list of bytes correspond to fragments
+    Output:
+    (m_, n_, p_, fragments): (int, int, int, [(idx, [int])]
+    """
+    data_fragments=[]
+    m_ = fragments[0].m
+    n_ = fragments[0].n
+    p_ = fragments[0].p
+    
+    # there should be at least m_ fragments
+    if len(fragments)<m_:
+        raise ValueError("Number of fragments is below the minimum number of fragments required to assemble the file.")
+    
+    # take the first m_ different fragments
+    indices=set() # store the indices of the fragments
+    count=0
+    
+    for fragment in fragments:
+        if count<m_:
+            n = fragment.n
+            p = fragment.p
+            idx = fragment.idx
+            m = fragment.m
+            
+            if idx in indices: 
+                continue
+            else: 
+                indices.add(idx)
+            
+            # check if the fragments have the same values of the parameters m, n, p, original_file_hash
+            if (m,n,p)!=(m_, n_,p_):
+                raise ValueError("These fragments are not derived from the same file.")
+            
+            data_fragments.append((idx+1,fragment.content))
+            count+=1
+        else: 
+            break
+        
+    if count<m: 
+        raise ValueError("There are duplicate fragments. The total number of different fragments are insufficient to assemble the file.")
+    
+    return (m_, n_, p_, data_fragments)
