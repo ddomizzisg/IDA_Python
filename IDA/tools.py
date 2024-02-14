@@ -44,6 +44,7 @@ def inner_product(a, b, p):
     Output: 
     The inner product of a and b, where computations are done modulo p  
     """
+    #print(sum((i*j) for i,j in zip(a,b)), p, sum((i*j) for i,j in zip(a,b))%p)
     return sum((i*j) for i,j in zip(a,b))%p
     
 def matrix_product(A,B, p): 

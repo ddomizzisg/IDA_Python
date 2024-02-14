@@ -2,6 +2,8 @@ from IDA.tools import build_building_blocks, inner_product, nextPrime
 from IDA.fragment_handler import fragment_writer
 import argparse
 import pickle
+import numpy as np
+import sys
 
 class Fragment:
     def __init__(self, idx, content, p, n, m): 
@@ -33,8 +35,7 @@ def split_bytes(data, n, m):
     # all computations are done modulo p
     p = 257 if n<257 else nextPrime(n)
     
-    
-    # split original data into chunks (subfiles) of length m 
+
     original_segments=[list(data[i:i+m]) for i in range(0,len(data),m)]
     
     # for the last subfile, if the length is less than m, pad the subfile with zeros 
@@ -45,16 +46,21 @@ def split_bytes(data, n, m):
         last_subfile=original_segments[-1]
         last_subfile.extend([0]*(m-residue))
     
+    original_segments_array = np.array(original_segments)
+    
     
     building_blocks=build_building_blocks(m,n,p)
-    
     fragments=[]
     for i in range(n): 
-        fragment = []
-        for k in range(len(original_segments)): 
-            fragment.append(inner_product(building_blocks[i], original_segments[k],p))
-            
-        frag = Fragment(i, fragment, p, n, m)
+        fragment_arr = np.array([inner_product(building_blocks[i], original_segments[k],p) for k in range(len(original_segments))] )
+        #print(fragment_arr)
+        #print(sys.getsizeof(fragment_arr))
+        #fragment = []       
+        #for k in range(len(original_segments)): 
+        #    fragment.append(inner_product(building_blocks[i], original_segments[k],p))
+        #print(fragment)
+        #print(sys.getsizeof(fragment))
+        frag = Fragment(i, fragment_arr, p, n, m)
         fragments.append(frag)
     
     return fragments
